@@ -1,0 +1,163 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: fastpass
+  description: fastpass発券機
+  termsOfService: https://github.com/masahide/fastpass
+  contact:
+    name: YAMASAKI Masahide
+    email: masahide.y@gmail.com
+  license:
+    name: BSD
+    url: https://github.com/masahide/fastpass/blob/master/LICENSE
+host: localhost
+basePath: /v1
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /events:
+    put:
+      description: イベントの作成
+      operationId: addEvent
+      parameters:
+        - name: event
+          in: body
+          description: イベントを追加
+          required: true
+          schema:
+            $ref: '#/definitions/Event'
+      responses:
+        200:
+          description: 作成成功
+          schema:
+            $ref: '#/definitions/Event'
+        409:
+          description: Conflict(作成済み)
+        500:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      description: イベント一覧
+      operationId: listEvents
+      parameters:
+        - name: limit
+          in: query
+          description: maximum number of results to return
+          required: false
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: 一覧取得成功
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+        500:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /events/{id}:
+    delete:
+      description: イベント削除
+      operationId: deleteEvent
+      parameters:
+        - name: id
+          in: path
+          description: イベントID
+          required: true
+          type: string
+      responses:
+        204:
+          description: イベント削除
+        500:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /events/{id}/tickets/{uid}:
+    put:
+      description: 発券
+      operationId: ticketing
+      parameters:
+        - name: id
+          in: path
+          description: イベントid
+          required: true
+          type: string
+        - name: uid
+          in: path
+          description: uid
+          required: true
+          type: string
+      responses:
+        200:
+          description: チケット発券
+          schema:
+            $ref: '#/definitions/Ticket'
+        409:
+          description: Conflict(発券済み)
+        500:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      description: チケット確認
+      operationId: getTicket
+      parameters:
+        - name: id
+          in: path
+          description: イベントid
+          required: true
+          type: string
+        - name: uid
+          in: path
+          description: uid
+          required: true
+          type: string
+      responses:
+        200:
+          description: 発券されている
+          schema:
+            $ref: '#/definitions/Ticket'
+        404:
+          description: 発券されていない
+        500:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Event:
+    required:
+      - id
+    properties:
+      id:
+        type: string
+      max_ticket:
+        type: integer
+        format: int32
+  Ticket:
+    required:
+      - event_id
+      - num
+    properties:
+      event_id:
+        type: string
+      num:
+        type: integer
+        format: int32
+  Error:
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
