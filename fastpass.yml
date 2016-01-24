@@ -20,27 +20,6 @@ produces:
   - application/json
 paths:
   /events:
-    put:
-      description: イベントの作成
-      operationId: addEvent
-      parameters:
-        - name: event
-          in: body
-          description: イベントを追加
-          required: true
-          schema:
-            $ref: '#/definitions/Event'
-      responses:
-        200:
-          description: 作成成功
-          schema:
-            $ref: '#/definitions/Event'
-        409:
-          description: Conflict(作成済み)
-        500:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/Error'
     get:
       description: イベント一覧
       operationId: listEvents
@@ -63,6 +42,36 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   /events/{id}:
+    put:
+      description: イベントの作成
+      operationId: addEvent
+      parameters:
+        - name: id
+          in: path
+          description: イベントID
+          required: true
+          type: string
+        - name: options
+          in: body
+          description: イベントを追加
+          required: true
+          schema:
+            properties:
+                max_ticket:
+                    type: integer
+                    format: int32
+                    description: 最大チケット数
+      responses:
+        200:
+          description: 作成成功
+          schema:
+            $ref: '#/definitions/Event'
+        409:
+          description: Conflict(作成済み)
+        500:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       description: イベント削除
       operationId: deleteEvent
@@ -100,6 +109,10 @@ paths:
           description: チケット発券
           schema:
             $ref: '#/definitions/Ticket'
+        403:
+          description: 発券数超過で発券を中止
+        404:
+          description: eventが見つからない
         409:
           description: Conflict(発券済み)
         500:
